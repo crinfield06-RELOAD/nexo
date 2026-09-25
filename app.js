@@ -1,4 +1,4 @@
-/* NEXO Académico · aplicación (no es necesario editar este archivo) */
+/* Nexo UPN · aplicación (no es necesario editar este archivo) */
 (function () {
   "use strict";
   var CFG = window.NEXO_CONFIG || { publicado: "", gids: {}, diasNuevo: 14 };
@@ -201,6 +201,7 @@
   /* ---------- Vistas ---------- */
   function vInicio() {
     var h = "";
+    h += '<div class="upn-band"><img src="upn-logo.png" alt="Universidad Privada del Norte" width="84" height="60"><span><b>Nexo UPN</b>Los recursos de tus cursos en la Universidad Privada del Norte, en un solo lugar.</span></div>';
     h += '<section class="hero"><div class="hero-id">' + avatar() + "<div><h1>" + esc(D.cfg.saludo || "Hola, bienvenido(a).") + '</h1><div class="who">' + esc(D.cfg.docente || "") + "</div></div></div>" +
       "<p>" + esc(D.cfg.mensaje || "") + "</p>" +
       '<form class="bigsearch" data-search role="search"><label class="sr" for="q-inicio">Buscar recursos</label>' + ic("buscar", 22) +
@@ -213,7 +214,7 @@
     h += '<div class="duo">';
     if (semanales) h += '<section><div class="sec-head"><h2>Esta semana</h2><a href="#semana">Ver todo</a></div><div class="grid">' + semanales + "</div></section>";
     h += '<section><div class="sec-head"><h2>Mis cursos</h2><a href="#cursos">Todos los cursos</a></div><div class="grid">' + activos.map(cardCurso).join("") + "</div></section></div>";
-    h += '<section aria-label="Por qué usar NEXO">' + '<ul class="value"><li>' + ic("reloj") + "<span><b>Esta semana, en un toque</b>Lo que necesitas para la sesión de hoy, por curso.</span></li><li>" + ic("enlace") + "<span><b>Todo conectado</b>Cada actividad trae su guía, plantilla y rúbrica.</span></li><li>" + ic("check") + "<span><b>Siempre la versión vigente</b>Cada archivo muestra su fecha de actualización.</span></li></ul></section>";
+    h += '<section aria-label="Por qué usar Nexo UPN">' + '<ul class="value"><li>' + ic("reloj") + "<span><b>Esta semana, en un toque</b>Lo que necesitas para la sesión de hoy, por curso.</span></li><li>" + ic("enlace") + "<span><b>Todo conectado</b>Cada actividad trae su guía, plantilla y rúbrica.</span></li><li>" + ic("check") + "<span><b>Siempre la versión vigente</b>Cada archivo muestra su fecha de actualización.</span></li></ul></section>";
 
     var dest = D.recursos.filter(function (r) { return DESTACADOS[r.destacado]; }).sort(function (a, b) { return "📌🔥⭐🆕".indexOf(a.destacado) - "📌🔥⭐🆕".indexOf(b.destacado); });
     if (dest.length) h += '<section><div class="sec-head"><h2>Destacados</h2></div><div class="rail">' + dest.map(function (r) {
@@ -520,16 +521,16 @@
     else if (r.tipo === "privacidad") vista = vPrivacidad();
     else vista = vNoEncontrado();
     var nav = [["inicio", "", "Inicio", "home"], ["cursos", "cursos", "Cursos", "cursos"], ["semana", "semana", "Esta semana", "semana"], ["biblioteca", "biblioteca", "Biblioteca", "biblioteca"]];
-    var nombre = D.cfg.nombre_sitio || "NEXO Académico";
+    var nombre = D.cfg.nombre_sitio || "Nexo UPN"; if (/nexo acad/i.test(nombre)) nombre = "Nexo UPN";
     var ult = D.recursos.map(function (x) { return parseFecha(x.actualizado); }).filter(Boolean).sort(function (a, b) { return b - a; })[0];
     document.title = nombre;
     document.getElementById("app").innerHTML =
-      '<header class="top"><div class="top-in"><a class="logo" href="#"><span class="logo-mark" aria-hidden="true">N</span><span class="logo-txt">' + esc(nombre.split(" ")[0]) + "<small>" + esc(D.cfg.docente || "") + "</small></span></a>" +
+      '<header class="top"><div class="top-in"><a class="logo" href="#" aria-label="' + esc(nombre) + ', inicio"><img class="logo-upn" src="upn-logo.png" alt="Universidad Privada del Norte" width="67" height="48"><span class="logo-txt">' + esc(nombre) + "<small>" + esc(D.cfg.docente || "") + "</small></span></a>" +
       '<nav class="topnav" aria-label="Principal">' + nav.map(function (n) { return '<a href="#' + n[1] + '"' + (sec === n[0] ? ' aria-current="page"' : "") + ">" + n[2] + "</a>"; }).join("") + "</nav>" +
       '<form class="topsearch" data-search role="search"><label class="sr" for="q-top">Buscar</label>' + ic("buscar", 18) + '<input id="q-top" type="search" autocomplete="off" placeholder="Buscar recursos"></form></div></header>' +
       (ES_EJEMPLO ? '<div class="demo"><span>Vista de ejemplo con datos de muestra de CINE1248P. Los archivos se activan al conectar tu hoja de Google.</span></div>' : "") +
       "<main>" + vista + "</main>" +
-      '<footer><span>' + esc(D.cfg.docente || "") + (ult ? " · Actualizado " + FMT.format(ult) : "") + '</span><nav><a href="#ayuda">Ayuda</a><a href="#privacidad">Privacidad</a></nav></footer>' +
+      '<footer><span class="foot-id"><img src="upn-logo.png" alt="" width="45" height="32">' + esc(D.cfg.docente || "") + (ult ? " · Actualizado " + FMT.format(ult) : "") + '</span><nav><a href="#ayuda">Ayuda</a><a href="#privacidad">Privacidad</a></nav></footer>' +
       '<nav class="bottomnav" aria-label="Principal">' + nav.map(function (n) { return '<a href="#' + n[1] + '"' + (sec === n[0] ? ' aria-current="page"' : "") + ">" + ic(n[3], 22) + n[2] + "</a>"; }).join("") + "</nav>";
     vigilarFoto();
     if (r.tipo === "biblioteca") { pintarFiltros(); pintarResultados(); }

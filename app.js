@@ -32,6 +32,8 @@
     carpeta: '<path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>',
     atras: '<path d="M19 12H5m6-6-6 6 6 6"/>',
     chev: '<path d="m6 9 6 6 6-6"/>',
+    audio: '<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 15a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 15a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z"/>',
+    play: '<path d="m7 4 13 8-13 8z"/>',
     reloj: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     enlace: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
@@ -44,6 +46,8 @@
     "saberes esenciales": { icon: "archivo", v: "--t-saberes", pl: "Saberes esenciales", ord: 3 },
     "presentacion": { icon: "presentacion", v: "--t-presentacion", pl: "Presentaciones", ord: 1 },
     "video": { icon: "video", v: "--t-video", pl: "Videos", ord: 2 },
+    "podcast": { icon: "audio", v: "--t-podcast", pl: "Podcasts", ord: 2.5 },
+    "audio": { icon: "audio", v: "--t-podcast", pl: "Audios", ord: 2.5 },
     "guia": { icon: "guia", v: "--t-guia", pl: "Guías", ord: 4 },
     "actividad": { icon: "actividad", v: "--t-actividad", pl: "Actividades", ord: 5 },
     "plantilla": { icon: "plantilla", v: "--t-plantilla", pl: "Plantillas", ord: 6 },
@@ -286,7 +290,15 @@
     return h;
   }
 
-  var TABS = [["semana", "Por semana"], ["saberes", "Saberes esenciales"], ["actividades", "Actividades y guías"], ["plantillas", "Plantillas y herramientas"], ["rubricas", "Rúbricas"]];
+  function esAudio(r) { var t = norm(r.tipo); return t === "podcast" || t === "audio"; }
+  function driveId(u) { var m = String(u || "").match(/\/d\/([\w-]{20,})/) || String(u || "").match(/[?&]id=([\w-]{20,})/); return m ? m[1] : ""; }
+  function reproductor(r) {
+    var id = driveId(r.enlace);
+    return '<div class="player" data-player="' + esc(id) + '">' + ticon(r.tipo, 22) + '<div class="player-txt"><b>' + esc(r.titulo) + "</b>" +
+      (r.descripcion ? "<span>" + esc(r.descripcion) + "</span>" : "") + '<span class="meta">' + (r.subtema ? "Subtema " + esc(r.subtema) + " · " : "") + (r.peso ? esc(r.peso) : "") + "</span></div>" +
+      (id ? '<button class="btn primary" data-play="' + esc(id) + '">' + ic("play", 16) + "Escuchar</button>" : '<a class="btn" href="#recurso.' + encodeURIComponent(r.id) + '">Ver</a>') + "</div>";
+  }
+  var TABS = [["semana", "Por semana"], ["audios", "Podcasts"], ["saberes", "Saberes esenciales"], ["actividades", "Actividades y guías"], ["plantillas", "Plantillas y herramientas"], ["rubricas", "Rúbricas"]];
   function vCurso(cod, tab) {
     var c = D.curso[cod]; if (!c) return vNoEncontrado();
     tab = tab || "semana";
@@ -297,6 +309,7 @@
       (c.logro ? "<p><b>Al terminar el curso:</b> " + esc(c.logro) + "</p>" : "") + '<div class="btns">' +
       (w ? '<a class="btn primary" href="#curso.' + esc(cod) + '.semana">' + ic("semana", 18) + "Semana " + pad(w) + "</a>" : "") +
       (silabo ? '<a class="btn" href="#recurso.' + encodeURIComponent(silabo.id) + '">' + ic("archivo", 18) + "Sílabo</a>" : (c.silabo ? '<a class="btn" href="' + esc(c.silabo) + '" target="_blank" rel="noopener">' + ic("archivo", 18) + "Sílabo</a>" : "")) +
+      (recursosDe(cod, esAudio).length ? '<a class="btn" href="#curso.' + esc(cod) + '.audios">' + ic("audio", 18) + "Podcasts (" + recursosDe(cod, esAudio).length + ")</a>" : "") +
       (c.grupo ? '<a class="btn" href="' + esc(c.grupo) + '" target="_blank" rel="noopener">' + ic("candado", 18) + "Solicitar acceso a los archivos</a>" : "") +
       (c.aula_virtual ? '<a class="btn" href="' + esc(c.aula_virtual) + '" target="_blank" rel="noopener">' + ic("aula", 18) + "Aula virtual</a>" : "") + "</div></section>";
     h += '<nav class="tabs" aria-label="Secciones del curso">' + TABS.map(function (t) { return '<a href="#curso.' + esc(cod) + "." + t[0] + '"' + (t[0] === tab ? ' aria-current="page"' : "") + ">" + t[1] + "</a>"; }).join("") + "</nav>";
@@ -305,10 +318,24 @@
       var s = '<div class="stack">';
       for (var i = 1; i <= totalSem(c); i++) s += bloqueSemana(c, i, i === w);
       h += "<section>" + s + "</div></section>";
+    } else if (tab === "audios") {
+      var aus = recursosDe(cod, esAudio), tA = w ? temaDeSemana(c, w) : null;
+      if (!aus.length) h += '<section><div class="empty">' + ic("audio", 28) + "<p>Aún no hay podcasts publicados para este curso.</p></div></section>";
+      else {
+        h += '<section><p class="cap">Escúchalos aquí mismo o ábrelos en Google Drive. Se reproducen con la cuenta con la que te uniste al grupo del curso.</p></section>';
+        h += '<section class="stack">' + D.temas.filter(function (t) { return t.curso === cod; }).map(function (t) {
+          var rs = aus.filter(function (r) { return String(r.tema) === String(t.tema); }).sort(function (a, b) { return String(a.subtema).localeCompare(String(b.subtema), "es", { numeric: true }) || a.titulo.localeCompare(b.titulo, "es"); });
+          if (!rs.length) return "";
+          var ahora = tA && tA.tema === t.tema;
+          return '<details class="block' + (ahora ? " is-now" : "") + '" open><summary><span class="wk">TEMA<b>' + esc(t.tema) + '</b></span><span><span class="sum-title">' + esc(t.titulo) + (ahora ? '<span class="nowpill">En curso</span>' : "") + '</span><br><span class="sum-sub">' + rs.length + " podcast" + (rs.length > 1 ? "s" : "") + "</span></span>" + ic("chev") + '</summary><div class="block-body">' + rs.map(reproductor).join("") + "</div></details>";
+        }).join("") + "</section>";
+        var sinTema = aus.filter(function (r) { return !r.tema; });
+        if (sinTema.length) h += '<section><div class="sec-head"><h2>Otros audios</h2></div>' + sinTema.map(reproductor).join("") + "</section>";
+      }
     } else if (tab === "saberes") {
       var tAct = w ? temaDeSemana(c, w) : null;
       h += '<section class="stack">' + D.temas.filter(function (t) { return t.curso === cod; }).map(function (t) {
-        var rs = recursosDe(cod, function (r) { return String(r.tema) === String(t.tema) && ["saberes esenciales", "presentacion", "video", "lectura", "infografia", "documento"].indexOf(norm(r.tipo)) >= 0; });
+        var rs = recursosDe(cod, function (r) { return String(r.tema) === String(t.tema) && ["saberes esenciales", "presentacion", "video", "podcast", "audio", "lectura", "infografia", "documento"].indexOf(norm(r.tipo)) >= 0; });
         var generales = rs.filter(function (r) { return !r.subtema; }).sort(porOrden);
         var subs = D.subtemas.filter(function (s) { return s.curso === cod && String(s.tema) === String(t.tema); });
         var body = (t.capacidad ? '<p class="cap">' + esc(t.capacidad) + "</p>" : "") + lista(generales);
@@ -346,6 +373,7 @@
       (l.ver ? '<a class="btn primary" href="' + esc(l.ver) + '" target="_blank" rel="noopener">' + ic("ver") + "Ver recurso</a>" : '<button class="btn primary" data-demo>' + ic("ver") + "Ver recurso</button>") +
       (l.descargar ? '<a class="btn gold" href="' + esc(l.descargar) + '" target="_blank" rel="noopener">' + ic("descargar") + "Descargar</a>" : (!l.ver ? '<button class="btn gold" data-demo>' + ic("descargar") + "Descargar</button>" : "")) +
       (ext ? '<a class="btn" href="' + esc(ext) + '" target="_blank" rel="noopener">' + ic("externo") + "Abrir recurso externo</a>" : "") + "</div>" +
+      (esAudio(r) && driveId(r.enlace) ? '<div class="player" data-player="' + esc(driveId(r.enlace)) + '"><button class="btn primary" data-play="' + esc(driveId(r.enlace)) + '">' + ic("play", 16) + "Escuchar aquí</button></div>" : "") +
       (norm(r.visibilidad) !== "publico" ? '<div class="lock">' + ic("candado", 18) + "<span>" + esc(D.cfg.aviso_acceso || "El archivo es solo para estudiantes del curso.") + (c && c.grupo ? ' <a href="' + esc(c.grupo) + '" target="_blank" rel="noopener">Solicitar acceso</a>' : "") + "</span></div>" : "") +
       '</div><div class="card"><dl class="facts">' +
       "<dt>Curso</dt><dd><a href=\"#curso." + esc(r.curso) + '"><span class="mono">' + esc(r.curso) + "</span> " + esc(c ? c.nombre : "") + "</a></dd>" +
@@ -533,6 +561,14 @@
     Q[k] = e.target.value; if (k === "curso") Q.tema = ""; Q.limite = 40; pintarFiltros(); pintarResultados();
   });
   document.addEventListener("click", function (e) {
+    var pl = e.target.closest("[data-play]");
+    if (pl) {
+      e.preventDefault(); var pid = pl.getAttribute("data-play"), box = pl.closest("[data-player]");
+      var fr = document.createElement("iframe"); fr.className = "player-frame"; fr.src = "https://drive.google.com/file/d/" + pid + "/preview"; fr.allow = "autoplay"; fr.title = "Reproductor de audio";
+      var alt = document.createElement("a"); alt.href = "https://drive.google.com/file/d/" + pid + "/view"; alt.target = "_blank"; alt.rel = "noopener"; alt.className = "player-alt"; alt.textContent = "¿No se reproduce? Ábrelo en Google Drive";
+      var wrap = document.createElement("div"); wrap.className = "player-embed"; wrap.appendChild(fr); wrap.appendChild(alt);
+      pl.replaceWith(wrap); return;
+    }
     var b = e.target.closest("[data-q],[data-demo],[data-limpiar],[data-mas]"); if (!b) return;
     if (b.hasAttribute("data-q")) irABiblioteca(b.getAttribute("data-q"));
     else if (b.hasAttribute("data-demo")) { e.preventDefault(); toast("Recurso de ejemplo: aquí se abrirá el archivo de Google Drive."); }

@@ -11,7 +11,7 @@
   --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
   --t-saberes:#2F5DA8; --t-presentacion:#C0602B; --t-guia:#2E7D6B; --t-actividad:#7A4FB0;
   --t-plantilla:#1F7A99; --t-herramienta:#8A6D1E; --t-rubrica:#A23B5A; --t-video:#C0392B;
-  --t-lectura:#5B6B2E; --t-infografia:#B5467E; --t-documento:#56627C;
+  --t-lectura:#5B6B2E; --t-podcast:#6A4BC4; --t-infografia:#B5467E; --t-documento:#56627C;
   --tint:12%;
 }
 @media (prefers-color-scheme: dark){
@@ -23,7 +23,7 @@
     --shadow:0 1px 2px rgba(0,0,0,.3); --tint:22%;
     --t-saberes:#7FA3E6; --t-presentacion:#E8935F; --t-guia:#5FC0A6; --t-actividad:#B292E3;
     --t-plantilla:#5BB8D6; --t-herramienta:#D6B455; --t-rubrica:#E07897; --t-video:#EA7465;
-    --t-lectura:#A9BC6C; --t-infografia:#E48AB7; --t-documento:#A3AEC4;
+    --t-lectura:#A9BC6C; --t-podcast:#A08BF0; --t-infografia:#E48AB7; --t-documento:#A3AEC4;
   }
 }
 :root[data-theme="dark"]{
@@ -34,7 +34,7 @@
   --shadow:0 1px 2px rgba(0,0,0,.3); --tint:22%;
   --t-saberes:#7FA3E6; --t-presentacion:#E8935F; --t-guia:#5FC0A6; --t-actividad:#B292E3;
   --t-plantilla:#5BB8D6; --t-herramienta:#D6B455; --t-rubrica:#E07897; --t-video:#EA7465;
-  --t-lectura:#A9BC6C; --t-infografia:#E48AB7; --t-documento:#A3AEC4;
+  --t-lectura:#A9BC6C; --t-podcast:#A08BF0; --t-infografia:#E48AB7; --t-documento:#A3AEC4;
 }
 
 *{box-sizing:border-box}
@@ -235,3 +235,14 @@ footer a{text-decoration:none;font-weight:600}
 .duo>section{display:flex;flex-direction:column}
 .duo .grid{flex:1}
 .row-title{font-size:16.5px}
+
+/* Podcasts */
+.player{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line,rgba(0,0,0,.1))}
+.player:first-child{border-top:0}
+.player-txt{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.player-txt span{font-size:.92rem;opacity:.85}
+.player-txt .meta{font-size:.8rem;opacity:.65}
+.player-embed{flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
+.player-frame{width:100%;height:120px;border:0;border-radius:12px;background:rgba(0,0,0,.04)}
+.player-alt{font-size:.85rem}
+.sheet .player{border-top:0;padding-top:12px}

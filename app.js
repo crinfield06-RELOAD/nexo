@@ -55,7 +55,9 @@
     "rubrica": { icon: "rubrica", v: "--t-rubrica", pl: "Rúbricas", ord: 8 },
     "lectura": { icon: "lectura", v: "--t-lectura", pl: "Lecturas", ord: 9 },
     "infografia": { icon: "infografia", v: "--t-infografia", pl: "Infografías", ord: 10 },
-    "documento": { icon: "archivo", v: "--t-documento", pl: "Documentos", ord: 11 }
+    "documento": { icon: "archivo", v: "--t-documento", pl: "Documentos", ord: 11 },
+    "ejemplo": { icon: "check", v: "--t-guia", pl: "Ejemplos desarrollados", ord: 9.5 },
+    "caso": { icon: "lectura", v: "--t-lectura", pl: "Casos y reportes de empresas", ord: 9.6 }
   };
   function tipoDe(t) { return TIPOS[norm(t)] || TIPOS.documento; }
   var DESTACADOS = { "🆕": "Nuevo", "🔥": "De la semana", "⭐": "Recomendado", "📌": "Importante" };
@@ -299,7 +301,7 @@
       (r.descripcion ? "<span>" + esc(r.descripcion) + "</span>" : "") + '<span class="meta">' + (r.subtema ? "Subtema " + esc(r.subtema) + " · " : "") + (r.peso ? esc(r.peso) : "") + "</span></div>" +
       (id ? '<button class="btn primary" data-play="' + esc(id) + '">' + ic("play", 16) + "Escuchar</button>" : '<a class="btn" href="#recurso.' + encodeURIComponent(r.id) + '">Ver</a>') + "</div>";
   }
-  var TABS = [["semana", "Por semana"], ["audios", "Podcasts"], ["saberes", "Saberes esenciales"], ["actividades", "Actividades y guías"], ["plantillas", "Plantillas y herramientas"], ["rubricas", "Rúbricas"]];
+  var TABS = [["semana", "Por semana"], ["audios", "Podcasts"], ["saberes", "Saberes esenciales"], ["actividades", "Actividades y guías"], ["plantillas", "Plantillas y herramientas"], ["complementario", "Material complementario"], ["rubricas", "Rúbricas"]];
   function vCurso(cod, tab) {
     var c = D.curso[cod]; if (!c) return vNoEncontrado();
     tab = tab || "semana";
@@ -357,6 +359,14 @@
         var rs = recursosDe(cod, function (r) { return norm(r.tipo) === k; }).sort(function (a, b) { return a.titulo.localeCompare(b.titulo, "es"); });
         if (rs.length) h += '<section><div class="sec-head"><h2>' + TIPOS[k].pl + "</h2></div>" + lista(rs) + "</section>";
       });
+    } else if (tab === "complementario") {
+      var hay = false;
+      [["ejemplo", "Ejemplos desarrollados", "Así se resuelve: úsalos como modelo para tus propias entregas."], ["lectura", "Lecturas", "Textos para profundizar en los temas del curso."], ["caso", "Casos y reportes de empresas", "Información real de organizaciones para tus actividades y tu desafío."], ["infografia", "Infografías", ""]].forEach(function (g) {
+        var rs = recursosDe(cod, function (r) { return norm(r.tipo) === g[0]; }).sort(function (a, b) { return (+a.tema || 99) - (+b.tema || 99) || a.titulo.localeCompare(b.titulo, "es"); });
+        if (!rs.length) return; hay = true;
+        h += '<section><div class="sec-head"><h2>' + g[1] + "</h2></div>" + (g[2] ? '<p class="cap">' + g[2] + "</p>" : "") + lista(rs) + "</section>";
+      });
+      if (!hay) h += '<section><div class="empty">Aún no hay material complementario publicado para este curso.</div></section>';
     } else if (tab === "rubricas") {
       var rb = recursosDe(cod, function (r) { return norm(r.tipo) === "rubrica"; }).sort(function (a, b) { return (+a.semana || 99) - (+b.semana || 99); });
       h += "<section>" + (lista(rb) || '<div class="empty">Aún no hay rúbricas publicadas.</div>') + "</section>";
